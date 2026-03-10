@@ -17,9 +17,27 @@ Port of janelia-arduino/TMC2209 — replacing Arduino HardwareSerial with Linux 
 - CMake >= 3.16
 - g++ (C++17)
 
+## Project Structure
+```
+TMC2209_Linux/
+├── CMakeLists.txt
+├── include/
+│   ├── linux_serial.h
+│   └── tmc2209_driver.h
+├── src/
+│   ├── linux_serial.cpp
+│   ├── tmc2209_driver.cpp
+│   ├── trapezoidal.cpp
+│   └── bindings.cpp
+└── third_party/
+    └── janelia/
+        ├── TMC2209.h      (from janelia-arduino/TMC2209 src/)
+        └── TMC2209.cpp    (from janelia-arduino/TMC2209 src/TMC2209/)
+```
+
 ## Build
 ```bash
-cd build
+mkdir build && cd build
 cmake ..
 make
 ```
