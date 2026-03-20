@@ -22,13 +22,16 @@ Port of janelia-arduino/TMC2209 — replacing Arduino HardwareSerial with Linux 
 TMC2209_Linux/
 ├── CMakeLists.txt
 ├── include/
-│   ├── linux_serial.h
-│   └── tmc2209_driver.h
+│   ├── Arduino.h          (shim — Arduino type aliases for Linux)
+│   ├── Stream.h           (shim — virtual destructor base class)
+│   ├── HardwareSerial.h   (shim — serial interface, base for LinuxSerial)
+│   ├── linux_serial.h     (LinuxSerial class declaration)
+│   └── tmc2209_driver.h   (stub — Week 3+)
 ├── src/
-│   ├── linux_serial.cpp
-│   ├── tmc2209_driver.cpp
-│   ├── trapezoidal.cpp
-│   └── bindings.cpp
+│   ├── linux_serial.cpp   (full termios UART implementation)
+│   ├── tmc2209_driver.cpp (stub — Week 3+)
+│   ├── trapezoidal.cpp    (stub — Week 4)
+│   └── bindings.cpp       (pybind11 module skeleton)
 └── third_party/
     └── janelia/
         ├── TMC2209.h      (from janelia-arduino/TMC2209 src/)
