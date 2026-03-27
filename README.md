@@ -26,10 +26,10 @@ TMC2209_Linux/
 │   ├── Stream.h           (shim — virtual destructor base class)
 │   ├── HardwareSerial.h   (shim — serial interface, base for LinuxSerial)
 │   ├── linux_serial.h     (LinuxSerial class, inherits HardwareSerial)
-│   └── tmc2209_driver.h   (driver class declaration)
+│   └── tmc2209_driver.h   (driver class with configure/stepPulse/stallguard)
 ├── src/
 │   ├── linux_serial.cpp   (full termios UART implementation)
-│   ├── tmc2209_driver.cpp (driver implementation — Week 3+)
+│   ├── tmc2209_driver.cpp (driver implementation)
 │   ├── trapezoidal.cpp    (acceleration algorithm — Week 4)
 │   └── bindings.cpp       (pybind11 Python bindings)
 └── third_party/
@@ -225,6 +225,11 @@ public:
 
     void configure(uint16_t current_ma, uint8_t microsteps);
     void setEnabled(bool en);
+    void stepPulse(uint32_t steps, bool dir);
+
+    uint32_t max_speed_   = 2000;
+    uint32_t accel_       = 500;
+    uint32_t start_speed_ = 100;
 
 private:
     LinuxSerial serial_;
@@ -238,7 +243,37 @@ private:
 ### src/tmc2209_driver.cpp
 ```cpp
 #include "tmc2209_driver.h"
-// Week 3: constructor, configure(), setEnabled() implementation
+#include <pigpio.h>
+
+TMC2209Driver::TMC2209Driver(int step_pin, int dir_pin, int en_pin,
+                             const char* uart_dev)
+    : serial_(uart_dev)
+    , step_pin_(step_pin)
+    , dir_pin_(dir_pin)
+    , en_pin_(en_pin)
+{
+    gpioInitialise();
+    gpioSetMode(step_pin_, PI_OUTPUT);
+    gpioSetMode(dir_pin_,  PI_OUTPUT);
+    gpioSetMode(en_pin_,   PI_OUTPUT);
+    gpioWrite(en_pin_, 1);  // disabled by default (ENN is active-low)
+}
+
+TMC2209Driver::~TMC2209Driver() {
+    gpioWrite(en_pin_, 1);  // disable motor
+    // DO NOT call gpioTerminate() — TEC library shares pigpio
+}
+
+void TMC2209Driver::configure(uint16_t current_ma, uint8_t microsteps) {
+    stepper_.setup(serial_);
+    stepper_.setRunCurrent(current_ma);
+    stepper_.setMicrostepsPerStep(microsteps);
+    stepper_.enableCoolStep();
+}
+
+void TMC2209Driver::setEnabled(bool en) {
+    gpioWrite(en_pin_, en ? 0 : 1);  // active-low: 0 = enabled
+}
 ```
 
 ### src/trapezoidal.cpp
@@ -256,7 +291,16 @@ namespace py = pybind11;
 PYBIND11_MODULE(tmc2209_module, m) {
     m.doc() = "TMC2209 Linux driver";
     py::class_<TMC2209Driver>(m, "TMC2209Driver")
-        .def(py::init<>());
+        .def(py::init<int, int, int, const char*>(),
+             py::arg("step_pin"),
+             py::arg("dir_pin"),
+             py::arg("en_pin"),
+             py::arg("uart_dev") = "/dev/ttyAMA2")
+        .def("configure", &TMC2209Driver::configure,
+             py::arg("current_ma"),
+             py::arg("microsteps"))
+        .def("set_enabled", &TMC2209Driver::setEnabled,
+             py::arg("en"));
 }
 ```
 
@@ -273,6 +317,7 @@ from tmc2209_module import TMC2209Driver
 
 tmc = TMC2209Driver(step_pin=21, dir_pin=20, en_pin=23)
 tmc.configure(current_ma=800, microsteps=8)
+tmc.set_enabled(True)
 tmc.run_to_position(3000)
 # del tmc → destructor releases GPIO23 cleanly
 ```
