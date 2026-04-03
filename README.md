@@ -1,3 +1,48 @@
+对，整个替换：
+
+```markdown
+# TMC2209_Linux
+
+C++ TMC2209 stepper driver for Raspberry Pi Linux.
+Port of janelia-arduino/TMC2209 — replacing Arduino HardwareSerial with Linux termios UART.
+
+## Hardware
+
+- Raspberry Pi CM4
+- TMC2209 stepper driver
+- UART: /dev/ttyAMA2 (57600 baud, single-wire half-duplex)
+- Step/Dir pulse generation via pigpio
+
+## Dependencies
+
+- pigpio
+- pybind11
+- CMake >= 3.16
+- g++ (C++17)
+
+## Project Structure
+```
+TMC2209_Linux/
+├── CMakeLists.txt
+├── include/
+│   ├── Arduino.h          (shim — Arduino types, macros, stub functions)
+│   ├── Stream.h           (shim — virtual destructor base class)
+│   ├── HardwareSerial.h   (shim — serial interface, base for LinuxSerial)
+│   ├── SoftwareSerial.h   (shim — minimal stub for janelia compatibility)
+│   ├── linux_serial.h     (LinuxSerial class, inherits HardwareSerial)
+│   ├── tmc2209_driver.h   (driver class declaration)
+│   └── trapezoidal.h      (TrapProfile struct + computeProfile declaration)
+├── src/
+│   ├── linux_serial.cpp   (full termios UART implementation)
+│   ├── tmc2209_driver.cpp (driver: configure, setEnabled, stepPulse)
+│   ├── trapezoidal.cpp    (trapezoidal acceleration algorithm)
+│   └── bindings.cpp       (pybind11 Python bindings with GIL release)
+└── third_party/
+    └── janelia/
+        ├── TMC2209.h      (from janelia-arduino/TMC2209 src/)
+        └── TMC2209.cpp    (from janelia-arduino/TMC2209 src/TMC2209/)
+```
+
 ## CMakeLists.txt
 ```cmake
 cmake_minimum_required(VERSION 3.16)
@@ -410,3 +455,6 @@ del tmc
 ## License
 
 BSD 3-Clause (based on janelia-arduino/TMC2209)
+```
+
+Python Usage 部分也更新了——用的是实际验证通过的引脚号（16/25/5）和参数。
