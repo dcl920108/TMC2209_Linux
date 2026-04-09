@@ -72,6 +72,8 @@ public:
     void configure(uint16_t current_ma, uint8_t microsteps);
     void setEnabled(bool en);
     void stepPulse(uint32_t steps, bool dir);
+    //4/9/2026
+    unit32_t runToPosition(uint32_t steps, bool dir);
 
     // Week 5 — StallGuard
     void setupStallGuard(uint8_t sgthrs, uint16_t tcoolthrs, uint16_t sw_threshold = 3);
