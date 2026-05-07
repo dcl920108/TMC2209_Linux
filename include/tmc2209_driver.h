@@ -14,6 +14,7 @@ public:
                    uint8_t sgthrs = 70, uint32_t tcoolthrs = 0xFFFFF);
     void setEnabled(bool en);
     void stepPulse(uint32_t steps, bool dir);
+    void setCurrentProfile(uint16_t run_ma, float hold_multiplier);
     uint32_t stepPulseUntilTriggered(uint32_t max_steps, bool dir, uint32_t threshold,
                                       uint32_t warmup_steps = 200);
 

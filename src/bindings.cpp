@@ -16,6 +16,8 @@ PYBIND11_MODULE(tmc2209_module, m) {
              py::arg("tcoolthrs") = 0xFFFFF)
         .def("set_enabled", &TMC2209Driver::setEnabled,
              py::arg("en"))
+        .def("set_current_profile", &TMC2209Driver::setCurrentProfile,
+             py::arg("run_ma"), py::arg("hold_multiplier"))
         .def("step_pulse", [](TMC2209Driver& self, uint32_t steps, bool dir) {
              py::gil_scoped_release release;
              self.stepPulse(steps, dir);

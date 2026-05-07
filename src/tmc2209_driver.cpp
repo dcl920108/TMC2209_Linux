@@ -75,6 +75,11 @@ void TMC2209Driver::configure(uint16_t current_ma, uint8_t microsteps,
 void TMC2209Driver::setEnabled(bool en) {
     gpioWrite(en_pin_, en ? 0 : 1);
 }
+void TMC2209Driver::setCurrentProfile(uint16_t run_ma, float hold_multiplier) {
+    stepper_.setRMSCurrent(run_ma, 0.11f, hold_multiplier);
+    serial_.flush();
+    usleep(5000);
+}
 
 void TMC2209Driver::stepPulse(uint32_t steps, bool dir) {
     if (steps == 0) return;

@@ -21,8 +21,8 @@ EN_PIN   = 5
 
 SGTHRS         = 70
 TCOOLTHRS      = 0xFFFFF
-THRESHOLD      = 20
-WARMUP_STEPS   = 200
+THRESHOLD      = 100    #20-----05052026
+WARMUP_STEPS   = 1000 #200----05/03/2026
 MAX_STEPS      = 12000
 
 HOMING_SENSOR_PIN     = 22
@@ -88,7 +88,7 @@ class MotorCycleApp(MDApp):
         tmc = TMC2209Driver(step_pin=STEP_PIN, dir_pin=DIR_PIN, en_pin=EN_PIN)
         tmc.configure(current_ma=600, microsteps=1, sgthrs=SGTHRS, tcoolthrs=TCOOLTHRS)
         tmc.max_speed   = 500
-        tmc.accel       = 150
+        tmc.accel       = 300
         tmc.start_speed = 100
         tmc.set_enabled(True)
 
