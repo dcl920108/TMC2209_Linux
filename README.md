@@ -180,21 +180,23 @@ tmc = TMC2209Driver(step_pin, dir_pin, en_pin, uart_dev='/dev/ttyAMA2')
 tmc.configure(current_ma, microsteps, sgthrs=70, tcoolthrs=0xFFFFF)
 
 # Motion parameters (read/write attributes)
-tmc.max_speed = 500
-tmc.accel = 150
+tmc.max_speed   = 500
+tmc.accel       = 150
 tmc.start_speed = 100
+
+# Current profile — run current and standstill hold ratio
+tmc.set_current_profile(run_ma=600, hold_multiplier=0.9)
 
 # Enable / disable
 tmc.set_enabled(True)
 tmc.set_enabled(False)
 
-# Motion
-tmc.step_pulse(steps, direction)                                    # blocking N-step move
-tmc.step_pulse_until_triggered(max_steps, dir, threshold, warmup)   # StallGuard-stopped move
+# Motion — both release the GIL while pulsing
+tmc.step_pulse(steps, dir)                                                     # blocking N-step move
+tmc.step_pulse_until_triggered(max_steps, dir, threshold, warmup_steps=200)    # StallGuard-stopped move
 
 # Diagnostics
-tmc.get_stallguard_result()       # read live SG_RESULT
-tmc.read_diag_level()             # read DIAG pin (0 or 1)
+tmc.read_diag_level()             # DIAG pin level (0 or 1)
 tmc.is_stealthchop_enabled()      # verify chopper mode
 tmc.get_version()                 # expected 0x21
 tmc.get_ifcnt()                   # UART interface counter
